@@ -92,10 +92,6 @@ The app intentionally supports local simulated payments, full refunds, one merch
 
 ## GitHub delivery status
 
-Local implementation and scenario commits are complete. Pushing on October 22, 2026 returned HTTP 403: Git authenticated as `Gaurav23p24`, which does not have write access to `gaurav-patel-28/order-processing-application`. The connected GitHub integration also reports `permissions.push = false`. Remote CI has therefore not run. No remote history was replaced.
+On October 22, 2026, Git was authenticated directly as `gaurav-patel-28` and successfully pushed `main` plus all three `scenario/*` branches to `https://github.com/gaurav-patel-28/order-processing-application`. The repository-local credential username selects that account; the other saved GitHub account remains available for other projects. No force-push was used.
 
-The completed checkout and all four local branches are in `G:\Projects\order-processing-application`. After granting the signed-in account write access or signing Git into an authorized account, run:
-
-```powershell
-git -C G:\Projects\order-processing-application push -u origin main scenario/duplicate-payment-webhook scenario/tenant-order-leak scenario/inventory-oversell
-```
+The completed checkout is in `G:\Projects\order-processing-application`. GitHub Actions results are available on the repository's Actions tab. Local test results above remain the separately executed verification record.
