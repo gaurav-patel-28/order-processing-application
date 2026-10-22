@@ -1,0 +1,77 @@
+name: orderflow
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-orderflow}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-orderflow}
+      POSTGRES_DB: ${POSTGRES_DB:-orderflow}
+    ports:
+      - "127.0.0.1:5432:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 3s
+      timeout: 3s
+      retries: 20
+  migrate:
+    build: ./backend
+    environment: &api-env
+      DATABASE_URL: postgresql+psycopg://${POSTGRES_USER:-orderflow}:${POSTGRES_PASSWORD:-orderflow}@db:5432/${POSTGRES_DB:-orderflow}
+      APP_ENV: ${APP_ENV:-development}
+      JWT_SECRET: ${JWT_SECRET:-development-only-change-before-production-123456}
+      WEBHOOK_SECRET: ${WEBHOOK_SECRET:-development-simulator-signing-secret}
+    command: ["alembic", "upgrade", "head"]
+    depends_on:
+      db:
+        condition: service_healthy
+  api:
+    build: ./backend
+    environment: *api-env
+    ports:
+      - "127.0.0.1:8000:8000"
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/ready')"]
+      interval: 5s
+      timeout: 3s
+      retries: 15
+  web:
+    build: ./frontend
+    ports:
+      - "127.0.0.1:8080:80"
+    depends_on:
+      api:
+        condition: service_healthy
+  test-db:
+    image: postgres:16-alpine
+    profiles: ["test"]
+    environment:
+      POSTGRES_USER: orderflow
+      POSTGRES_PASSWORD: orderflow
+      POSTGRES_DB: orderflow_test
+    ports:
+      - "127.0.0.1:5433:5432"
+    tmpfs:
+      - /var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U orderflow -d orderflow_test"]
+      interval: 2s
+      timeout: 2s
+      retries: 20
+  tests:
+    build: ./backend
+    profiles: ["test"]
+    environment:
+      DATABASE_URL: postgresql+psycopg://orderflow:orderflow@test-db:5432/orderflow_test
+      TEST_DATABASE_URL: postgresql+psycopg://orderflow:orderflow@test-db:5432/orderflow_test
+      APP_ENV: test
+    command: ["pytest", "-q"]
+    depends_on:
+      test-db:
+        condition: service_healthy
+volumes:
+  postgres-data:
