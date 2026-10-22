@@ -17,7 +17,7 @@ def scoped_order(db, user, order_id, lock=False):
     if lock:
         query = query.with_for_update()
     order = db.scalar(query)
-    if order is None or not can_access(user.role, user.org_id, user.id, order.org_id, order.customer_id):
+    if order is None or not can_access(user.role, user.org_id, user.id, user.org_id, order.customer_id):
         raise HTTPException(404, "Order not found")
     return order
 
