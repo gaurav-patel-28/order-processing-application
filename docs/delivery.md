@@ -89,3 +89,13 @@ FAILED tests/test_integration.py::test_last_unit_contention - assert 2 == 1
 The main branch is the working reference. Stop the app, ensure a clean checkout, switch to a scenario branch, rebuild, and run its focused check. Return to main and rebuild before ordinary demonstrations. Issue reports in `docs/maintenance-cases` describe symptoms and observations without providing repair instructions.
 
 The app intentionally supports local simulated payments, full refunds, one merchant membership per user, and a fixed demonstration tax rate. There is no Stripe adapter, real money processing, user provisioning, production hosting setup, physical returns workflow, or autonomous maintenance agent. A future real provider adapter needs durable reconciliation/outbox handling before it can be deployed safely.
+
+## GitHub delivery status
+
+Local implementation and scenario commits are complete. Pushing on October 22, 2026 returned HTTP 403: Git authenticated as `Gaurav23p24`, which does not have write access to `gaurav-patel-28/order-processing-application`. The connected GitHub integration also reports `permissions.push = false`. Remote CI has therefore not run. No remote history was replaced.
+
+The completed checkout and all four local branches are in `G:\Projects\order-processing-application`. After granting the signed-in account write access or signing Git into an authorized account, run:
+
+```powershell
+git -C G:\Projects\order-processing-application push -u origin main scenario/duplicate-payment-webhook scenario/tenant-order-leak scenario/inventory-oversell
+```
