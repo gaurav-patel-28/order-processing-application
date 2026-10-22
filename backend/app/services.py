@@ -148,6 +148,7 @@ def process_webhook(db, event, body):
     if previous:
         if previous.payload_hash != payload_hash or previous.attempt_id != attempt.id:
             raise HTTPException(409, "Provider event ID reused with different contents")
+        audit(db, order, order.status, "simulator", replayed=True)
         log.info(json.dumps({"event": "webhook_duplicate", "order_id": order.id, "provider_event": event.id}))
         return {"status": "duplicate"}
     if event.amount_cents != attempt.amount_cents:
