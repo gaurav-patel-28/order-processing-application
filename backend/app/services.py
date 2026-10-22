@@ -47,15 +47,14 @@ def change_status(db, order, target, actor):
 
 
 def reserve(db, product, quantity):
-    result = db.execute(
+    if not product.active or product.available < quantity:
+        raise HTTPException(409, f"Insufficient stock for {product.name}")
+    db.execute(
         update(Product)
-        .where(Product.id == product.id, Product.active.is_(True), Product.available >= quantity)
-        .values(available=Product.available - quantity, reserved=Product.reserved + quantity)
+        .where(Product.id == product.id)
+        .values(available=product.available - quantity, reserved=product.reserved + quantity)
         .execution_options(synchronize_session=False)
     )
-    if result.rowcount != 1:
-        log.info(json.dumps({"event": "inventory_conflict", "product_id": product.id}))
-        raise HTTPException(409, f"Insufficient stock for {product.name}")
 
 
 def create_order(db, user, data, key):
