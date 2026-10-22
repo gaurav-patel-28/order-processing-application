@@ -1,15 +1,19 @@
-# Delivery verification
+# Scenario verification
 
-The initial healthy implementation and the three isolated scenario branch commits are recorded below after execution. The scenario issue reports describe symptoms and focused checks without disclosing repair instructions.
+Branch: `scenario/inventory-oversell`.
 
-## Executed baseline checks
+Healthy baseline: `bde8d76306793b46ccdffeab1e29a50a7492bf02`.
 
-- Backend suite against isolated native PostgreSQL 18 on Windows; real migrations and transactions.
-- Ruff lint and formatting checks.
-- Alembic schema drift check.
-- TypeScript checking and production Vite build.
-- Three real Chromium browser workflows against the running native API and PostgreSQL database.
-- Docker Compose configuration validation and PowerShell developer-script syntax parsing.
-- Dependency audits through npm and pip-audit.
+Broken application commit: `53a7031c73e5de4712032e9f04a6b4503ae04f25`.
 
-Exact final test counts, commit IDs, and intentional failure excerpts are added when branch verification is complete. Docker Desktop's engine has not been available in this environment; full container runtime and GitHub Actions execution are separate checks and are not claimed as locally passed.
+Focused command: `pytest -q tests/test_integration.py::test_last_unit_contention` from backend, with disposable PostgreSQL configured.
+
+Observed output (exit 1, intentional failure):
+
+```text
+E       assert 2 == 1
+FAILED tests/test_integration.py::test_last_unit_contention - assert 2 == 1
+1 failed, 1 warning in 0.93s
+```
+
+Use the issue report in docs/maintenance-cases for symptoms/reproduction. Return to main for the healthy implementation and complete delivery record.
